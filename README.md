@@ -14,7 +14,7 @@ simulator ingestion paths.
 | :--- | :--- | :--- |
 | Python 3.6+ | Run the export script | stdlib only, no pip installs |
 | Internet | Nominatim + Overpass API | free, no API key |
-| CARLA (0.9.x) **or** BeamNG.drive | The simulator itself | Windows/Linux, needs GPU |
+| CARLA (0.9.x) · BeamNG.drive · **SUMO** | The simulator itself | CARLA/BeamNG need GPU · **SUMO runs on CPU only** |
 
 ---
 
@@ -43,7 +43,53 @@ the drivable `highway` network (no buildings/POIs bloat).
 
 ---
 
-## Step 2A — Import into CARLA
+## Step 2 — SUMO (free · CPU-only · runs on your GPU-less Ubuntu box)
+
+SUMO is the best fit when you have **no GPU**: it's free, open-source, and
+natively reads the `.osm` file your export tool just produced. It gives you
+the real Ontario street layout with AI traffic flowing on it.
+
+```bash
+# One-time install
+./setup-sumo.sh
+
+# Convert your .osm → SUMO network + traffic + config (one command)
+./osm2sumo.sh ontario_map.osm ontario
+
+# Run it locally (sumo-gui uses software rendering, no GPU needed)
+sumo-gui -c ontario.sumocfg
+```
+
+### 🌐 Run on Ubuntu, view in your Windows browser (noVNC)
+
+This is the "set up on the Ubuntu box, drive it from your Windows browser" path.
+`sumo-web.sh` starts a virtual display + VNC + noVNC web bridge, then prints a
+link you open in any browser.
+
+```bash
+./sumo-web.sh ontario.sumocfg
+```
+
+It prints something like:
+
+```
+🎮 SUMO is live — open this in your browser:
+
+   http://192.168.1.42:6080/vnc.html
+```
+
+Click that link in Chrome/Edge/Firefox on your Windows machine, hit **Connect**
+(no password), and you get the full sumo-gui — pan/zoom the map, press **Play**
+to start traffic, and drive a vehicle with the keyboard. Everything runs on the
+Ubuntu CPU; the browser just shows the picture.
+
+> **One-time firewall note:** if you can't reach the link from Windows, allow
+> the port on Ubuntu: `sudo ufw allow 6080/tcp` (and `5900/tcp` if you use a
+> native VNC client instead of the browser).
+
+---
+
+## Step 3A — Import into CARLA
 
 CARLA has a built-in OpenDRIVE (`.xodr`) converter that turns OSM road vectors
 into drivable asphalt meshes, traffic signals, and junction waypoints.
@@ -66,7 +112,7 @@ frame, extrudes road surfaces with correct lane widths, and spawns the world.
 
 ---
 
-## Step 2B — Import into BeamNG.drive (MapNG)
+## Step 3B — Import into BeamNG.drive (MapNG)
 
 1. Go to [mapng.com](https://mapng.com/)
 2. Navigate to your Ontario city and select your bounding area
@@ -101,3 +147,5 @@ The roads follow the exact GPS layout and turns from OpenStreetMap.
 | Simulator runs out of memory | Shrink the area (< 4 km²); re-export |
 | CARLA map looks flat/wrong | Check you used a small area; CARLA flattens GPS → local metric |
 | BeamNG roads missing | Re-enable "OSM features / Decal Roads" in MapNG before export |
+| SUMO browser link won't open | `sudo ufw allow 6080/tcp` on Ubuntu, then retry |
+| SUMO framerate chugs (no GPU) | Shrink the area (< 2 km²); re-export |
