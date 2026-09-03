@@ -19,11 +19,11 @@ if [ ! -f "$OSM" ]; then
 fi
 
 echo "🛣️  1/4  Building road network (netconvert)..."
-# NOTE: do NOT use --junctions.join / --tls.join — they trigger a known
-# netconvert assertion crash (angle >= 0 && angle < 360) on real OSM data.
-netconvert --osm-files "$OSM" -o "$PREFIX.net.xml" \
-  --geometry.remove --roundabouts.guess --ramps.guess \
-  --tls.guess-signals --tls.discard-simple
+# Use the BARE command — the "guessing" flags (--roundabouts.guess,
+# --ramps.guess, --junctions.join, --tls.*) trigger a known netconvert
+# assertion crash (angle >= 0 && angle < 360) on real OSM data.
+# Bare is the most reliable form and still imports the full road network.
+netconvert --osm-files "$OSM" -o "$PREFIX.net.xml"
 
 echo "🏘️  2/4  Extracting buildings/polygons (polyconvert)..."
 if [ -f "$TYPEMAP" ]; then
