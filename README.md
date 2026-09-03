@@ -87,6 +87,59 @@ Ubuntu CPU; the browser just shows the picture.
 > the port on Ubuntu: `sudo ufw allow 6080/tcp` (and `5900/tcp` if you use a
 > native VNC client instead of the browser).
 
+### 🔗 Public link from anywhere (Cloudflare tunnel — no firewall, no IP)
+
+If you don't want to deal with the firewall/IP at all, use `sumo-tunnel.sh`.
+It auto-installs `cloudflared`, starts the same SUMO + noVNC stack, and opens a
+**free public URL** (no account needed) that works from any browser on any
+network.
+
+```bash
+./sumo-tunnel.sh ontario.sumocfg
+```
+
+It prints a public link like:
+
+```
+🎮 SUMO is live on the internet — open this:
+
+   https://random-words-1234.trycloudflare.com/vnc.html
+```
+
+Open that from your Windows browser — no firewall changes, no IP lookup. The
+URL changes each time you run it (free tier), so just copy the one it prints.
+
+---
+
+## 🚀 Quick start (SUMO path — the whole thing, step by step)
+
+```bash
+# 1. Clone the repo
+cd ~
+git clone https://github.com/8LUEPRINT3/ontario-sim-export.git
+cd ontario-sim-export
+
+# 2. One-time install (SUMO + web stack; needs sudo)
+./setup-sumo.sh
+
+# 3. Export your Ontario roads (e.g. Barrie)
+python3 ontario-osm-export.py --city "Barrie" --radius 1.0
+
+# 4. Convert to a SUMO simulation (network + traffic + config)
+./osm2sumo.sh ontario_map.osm ontario
+
+# 5a. Run locally (sumo-gui on the Ubuntu display)
+sumo-gui -c ontario.sumocfg
+
+# 5b. …OR view in your Windows browser (LAN)
+./sumo-web.sh ontario.sumocfg
+#     → open the printed http://<ubuntu-ip>:6080/vnc.html
+
+# 5c. …OR public link from anywhere (no firewall hassle)
+./sumo-tunnel.sh ontario.sumocfg
+#     → open the printed https://…trycloudflare.com/vnc.html
+```
+
 ---
 
 ## Step 3A — Import into CARLA
@@ -147,5 +200,5 @@ The roads follow the exact GPS layout and turns from OpenStreetMap.
 | Simulator runs out of memory | Shrink the area (< 4 km²); re-export |
 | CARLA map looks flat/wrong | Check you used a small area; CARLA flattens GPS → local metric |
 | BeamNG roads missing | Re-enable "OSM features / Decal Roads" in MapNG before export |
-| SUMO browser link won't open | `sudo ufw allow 6080/tcp` on Ubuntu, then retry |
+| SUMO browser link won't open | `sudo ufw allow 6080/tcp` on Ubuntu, then retry — or use `./sumo-tunnel.sh` |
 | SUMO framerate chugs (no GPU) | Shrink the area (< 2 km²); re-export |

@@ -14,3 +14,5 @@ echo "   1. Export roads:  python3 ontario-osm-export.py --city \"Barrie\" --rad
 echo "   2. Build sim:     ./osm2sumo.sh ontario_map.osm ontario"
 echo "   3. Serve:         ./sumo-web.sh ontario.sumocfg"
 echo "   4. Open the printed URL in your Windows browser."
+echo ""
+echo "   (Optional) public link from anywhere — ./sumo-tunnel.sh"
