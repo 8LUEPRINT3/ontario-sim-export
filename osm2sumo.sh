@@ -8,7 +8,7 @@ set -euo pipefail
 
 OSM="${1:-ontario_map.osm}"
 PREFIX="${2:-ontario}"
-SUMO_HOME="${SUMO_HOME:-/usr/share/sumo}"
+export SUMO_HOME="${SUMO_HOME:-/usr/share/sumo}"
 TOOLS="$SUMO_HOME/tools"
 TYPEMAP="$SUMO_HOME/data/typemap/osmPolyconvert.typ.xml"
 
@@ -19,9 +19,11 @@ if [ ! -f "$OSM" ]; then
 fi
 
 echo "🛣️  1/4  Building road network (netconvert)..."
+# NOTE: do NOT use --junctions.join / --tls.join — they trigger a known
+# netconvert assertion crash (angle >= 0 && angle < 360) on real OSM data.
 netconvert --osm-files "$OSM" -o "$PREFIX.net.xml" \
   --geometry.remove --roundabouts.guess --ramps.guess \
-  --junctions.join --tls.guess-signals --tls.discard-simple --tls.join
+  --tls.guess-signals --tls.discard-simple
 
 echo "🏘️  2/4  Extracting buildings/polygons (polyconvert)..."
 if [ -f "$TYPEMAP" ]; then
